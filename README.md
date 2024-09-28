@@ -6,6 +6,7 @@ A simple, expandable Python library for symboic math, designed to help developer
 
 This is created as the base protoype model for the "Mathematishia Computer Algebra System", but feel free to use this package as the way you wanted, licensed under the MIT license.
 
+<!--
 #### Code Principles & Guidelines
 
 * Modularity:
@@ -21,3 +22,4 @@ This is created as the base protoype model for the "Mathematishia Computer Algeb
 * Performance:
   * While clarity and pedagogy are priorites, always consider perfomance impact of algorithms as well, since we are working with python here.
   * Use lazy evaluation or caching when dealing with more complex symbolic manipulations.
+-->
