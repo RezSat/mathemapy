@@ -11,3 +11,17 @@ z = Addition(m,o)
 u = z.evaluate()
 print(i==o)
 print(z, u)
+
+x = Symbol('x')
+y = Symbol('y')
+num1 = Number(5)
+num2 = Number(3)
+
+# Add two numbers
+expr = Addition(num1, num2)
+print(expr.evaluate())  # Output: Number(8)
+
+# Add two symbols and a number
+expr = Addition(x, Addition(x, Addition(num1, Addition(q, num2))))
+print(expr.evaluate())  # Output: (x + y + 5)
+print(expr.terms)
