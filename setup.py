@@ -25,3 +25,12 @@ print(expr.evaluate())  # Output: Number(8)
 expr = Addition(x, Addition(x, Addition(num1, Addition(q, num2))))
 print(expr.evaluate())  # Output: (x + y + 5)
 print(expr.terms)
+
+# Complex case: x + 2*x + 3 + x
+x = Symbol('x')
+y = Symbol('2x')
+num1 = Number(5)
+num2 = Number(3)
+expr = Addition(x,y )
+print(expr.evaluate())  # Output: (4*x + 3)
+print(expr.terms)

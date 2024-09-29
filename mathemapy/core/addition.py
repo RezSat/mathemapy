@@ -48,7 +48,17 @@ class Addition(BinaryOperator):
             if isinstance(term, Number):
                 collected['number'] = collected.get('number', 0) + term.value
             elif isinstance(term, Symbol):
-                collected[term.name] = collected.get(term.name, 0) + 1
+                if term.name in collected:
+                    collected[term.name] += 1 # Increment coefficient
+                else:
+                    collected[term.name] = 1 #collected.get(term.name, 0) + 1
+            elif isinstance(term, Multiplication):
+                base, coeff = term.left, term.right
+                if isinstance(base, Symbol) and isinstance(coeff, Number):
+                    if base.name in collected:
+                        collected[base.name] += coeff.value
+                    else:
+                        collected[base.name] = coeff.value
             else:
                 collected[term] = collected.get(term, 0) + 1
 
