@@ -68,6 +68,13 @@ class TestMathemapyOperations(unittest.TestCase):
         result = expr.evaluate()
         self.assertEqual(result, Addition(Number(5), Power(Symbol('x'), Number(3))))  # Simplified as x^3 + 5
 
+    def test_manual_expression(self):
+        x = Symbol('x')
+        y = Symbol('y')
+        expr1 = Addition(x, Addition(y, Number(8)))
+        expr2 = Addition(x, Addition(y, Number(8)))
+
+        self.assertEqual(expr1, expr2)
 
 if __name__ == "__main__":
     unittest.main()

@@ -28,7 +28,7 @@ class Power(BinaryOperator):
             return Number(1)  # 1^x = 1
         if evaluated_exponent == 0:
             return Number(1)  # x^0 = 1 for any x != 0
-        return Power(evaluated_base, evaluated_exponent)
+        return Power(Symbol(evaluated_base), evaluated_exponent)
 
     def _flattern(self, base, exponent):
         """

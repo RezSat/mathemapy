@@ -17,12 +17,23 @@ class BinaryOperator(Operator):
         self.right = right
 
     def _compare_same_type(self, other):
+        if self.symbol == other.symbol == "+":
+            return self.terms == other.terms
+        elif self.symbol == other.symbol == '-':
+            return self.terms == other.terms
         return self.left == other.left and self.right == other.right
 
     def _get_hash_value(self):
         return (self.left, self.right)
 
     def __repr__(self):
+
+        """
+        Return a string representation of the binary operator.
+        
+        The representation is in the form "(left operator right)".
+        """
+        
         return f"({repr(self.left)} {self.symbol} {repr(self.right)})"
 
 class UnaryOperator(Operator):

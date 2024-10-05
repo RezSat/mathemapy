@@ -21,6 +21,7 @@ class Multiplication(BinaryOperator):
             remaining_factors.insert(0, numeric_product)
         if len(remaining_factors) == 1:
             return remaining_factors[0]  # If only one factor, return it
+            
         return self._group_as_binary_multiplication(remaining_factors)
 
     def _group_as_binary_multiplication(self, factors):
@@ -41,6 +42,7 @@ class Multiplication(BinaryOperator):
                 operands.extend(factor._flattern(factor.left, factor.right))
             else:
                 operands.append(factor)
+        
         return operands
 
     def _collect_like_factors(self, factors):
@@ -52,7 +54,6 @@ class Multiplication(BinaryOperator):
             elif isinstance(factor, Symbol):
                 if factor.name in collected:
                     collected[factor.name] += 1  # Increment exponent
-                    print(collected[factor.name])
                 else:
                     collected[factor.name] = 1
             else:
@@ -65,10 +66,9 @@ class Multiplication(BinaryOperator):
         for factor, exponent in collected.items():
             if factor != 'number' and exponent != 0:
                 if exponent == 1:
-                    result.append(factor)
+                    result.append(Symbol(factor))
                 else:
-                    result.append(Power(factor, Number(exponent)))  # x^n can be written as x * x * x ...
-
+                    result.append(Power(Symbol(factor), Number(exponent)))  # x^n can be written as x * x * x ...
         return result
 
     def _product(self, factors):
@@ -77,6 +77,3 @@ class Multiplication(BinaryOperator):
         for factor in factors:
             product *= factor
         return product
-
-    def __repr__(self):
-        return " * ".join([repr(factor) for factor in self.factors])

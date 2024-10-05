@@ -71,7 +71,7 @@ class Addition(BinaryOperator):
         for term, coeff in collected.items():
             if term != 'number' and coeff != 0:
                 if coeff == 1:
-                    result.append(term)
+                    result.append(Symbol(term))
                 else:
                     result.append(Multiplication(Number(coeff), Symbol(term)))
         return result
