@@ -30,6 +30,6 @@ create more expressions to handle test cases,
 add the step support to the basic operations
 add language feature
 
-
+definealty re-write the entire subtraction class from scratch, this time no trying to copy addition and reversing it :))
 Considerations -> Do we really need BinaryOperator and UnaryOperator ? instead try to get ideas from sympy or mathjs and mathsteps
 -->
