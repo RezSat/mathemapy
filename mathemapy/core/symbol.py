@@ -1,5 +1,4 @@
 from .node import Node
-from .expr import Expr
 
 class Symbol(Node):
     is_Symbol = True
@@ -9,10 +8,14 @@ class Symbol(Node):
         self.name = name
         self.assumptions = self._sanitize(assumptions)
 
-    def __eq__(self, other):
-        if isinstance(other, Symbol):
-            return self.name == other.name
-        return False
+    def _get_hash_value(self):
+        return self.name
+
+    def _compare_same_type(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash((self.__class__, self._get_hash_value()))
 
     def evaluate(self):
         return self.name

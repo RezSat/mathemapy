@@ -16,6 +16,12 @@ class BinaryOperator(Operator):
         self.left = left
         self.right = right
 
+    def _compare_same_type(self, other):
+        return self.left == other.left and self.right == other.right
+
+    def _get_hash_value(self):
+        return (self.left, self.right)
+
     def __repr__(self):
         return f"({repr(self.left)} {self.symbol} {repr(self.right)})"
 

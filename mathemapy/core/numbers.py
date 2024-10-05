@@ -1,21 +1,24 @@
 from .node import Node
-from .expr import Expr
 from decimal import Decimal
 
-class Number(Node, Expr):
+class Number(Node):
     def __init__(self, value):
         self.value = value
 
     def evaluate(self):
         return self.value
+    
+    def _get_hash_value(self):
+        return self.value
+
+    def _compare_same_type(self, other):
+        return self.value == other.value
+
+    def __hash__(self):
+        return hash((self.__class__, self._get_hash_value()))
 
     def __repr__(self):
-        return str(self.value)
-
-    def __eq__(self, other):
-        if isinstance(other, Number):
-            return self.value == other.value
-        return False
+        return str(self.value)    
 
 class Integer(Number):
     def __init__(self, value):
