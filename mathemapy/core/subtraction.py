@@ -84,7 +84,9 @@ class Subtraction(BinaryOperator):
             return Number(-term.value)
         elif isinstance(term, Multiplication) and isinstance(term.left, Number):
             return Multiplication(Number(-term.left.value), term.right)
+        elif isinstance(term, Subtraction):
+            return term
         return Multiplication(Number(-1), term)
 
     def __repr__(self):
-        return " - ".join([repr(term) for term in self.terms])
+        return f"({" - ".join([repr(term) for term in self.terms])})"

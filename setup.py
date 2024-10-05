@@ -1,16 +1,17 @@
 from mathemapy import *
-
 x = Symbol('x')
-y = Symbol('x')
-expr = Multiplication(x, y)
+y = Symbol('y')
+num1 = Number(5)
+num2 = Number(3)
+expr = Subtraction(x, Subtraction(y, Subtraction(num1, num2))) # x - (y - (5 - 3)) -> x - (y - 2)
 result = expr.evaluate()
-
-u = Power(Symbol('x'), Number(2))
-print(result == u) # x * x = x^2
 print(result)
-print( u)
-print(type(u.exponent) )
-print(result.exponent)
+ep = Subtraction(Symbol('x'), Subtraction(Symbol('y'), Number(2)))
+print(ep)
+print(result == ep)
 
-p = Number(2)
-print(p==2)
+print(Subtraction(Number(-5), Symbol('y')))
+
+print(ep)
+
+print(Addition(Symbol('x'), Addition(Symbol('y'), Number(2))))
