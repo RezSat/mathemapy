@@ -1,4 +1,5 @@
 from .node import Node
+from .expr import Expr
 from .operators import Operator, BinaryOperator, UnaryOperator
 from .numbers import Number, Integer, Float
 from .symbol import Symbol, Dummy, Wild
@@ -10,6 +11,7 @@ from .power import Power
 
 __all__ = [
     'Node',
+    'Expr',
     'Operator',
     'BinaryOperator',
     'UnaryOperator',

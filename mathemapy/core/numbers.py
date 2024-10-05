@@ -1,7 +1,8 @@
 from .node import Node
+from .expr import Expr
 from decimal import Decimal
 
-class Number(Node):
+class Number(Node, Expr):
     def __init__(self, value):
         self.value = value
 
@@ -10,6 +11,11 @@ class Number(Node):
 
     def __repr__(self):
         return str(self.value)
+
+    def __eq__(self, other):
+        if isinstance(other, Number):
+            return self.value == other.value
+        return False
 
 class Integer(Number):
     def __init__(self, value):
