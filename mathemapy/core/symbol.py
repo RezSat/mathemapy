@@ -12,7 +12,10 @@ class Symbol(Node):
         return self.name
 
     def _compare_same_type(self, other):
-        return self.name == other.name
+        if isinstance(other, Symbol):
+            return self.name == other.name
+        else:
+            return False
 
     def __hash__(self):
         return hash((self.__class__, self._get_hash_value()))

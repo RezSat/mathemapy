@@ -10,6 +10,9 @@ class Power(BinaryOperator):
         super().__init__(base, exponent)
         self.base, self.exponent = self._flattern(base, exponent)
 
+    def _compare_same_type(self, other):
+        return isinstance(other, Power) and self.base == other.base and self.exponent == other.exponent
+
     def evaluate(self):
         evaluated_base = self.base.evaluate() if isinstance(self.base, Node) else self.base
         evaluated_exponent = self.exponent.evaluate() if isinstance(self.exponent, Node) else self.exponent

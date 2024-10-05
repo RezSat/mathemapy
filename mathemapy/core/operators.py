@@ -21,6 +21,11 @@ class BinaryOperator(Operator):
             return self.terms == other.terms
         elif self.symbol == other.symbol == '-':
             return self.terms == other.terms
+        elif self.symbol == other.symbol == '*':
+            return self.factors == other.factors
+        elif self.symbol == other.symbol == "^":
+            print('came here')
+            return self.base == other.base and self.exponent == other.exponent
         return self.left == other.left and self.right == other.right
 
     def _get_hash_value(self):

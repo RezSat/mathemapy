@@ -12,6 +12,9 @@ class Multiplication(BinaryOperator):
         flat_factors = self._flattern(left, right)
         self.factors = self._collect_like_factors(flat_factors)
 
+    def _compare_same_type(self, other):
+        return isinstance(other, Multiplication) and self.factors == other.factors
+
     def evaluate(self):
         evaluated_factors = [ factor.evaluate() if isinstance(factor, Node) else factor for factor in self.factors ]
         numeric_product = Number(self._product([factor for factor in evaluated_factors if isinstance(factor, (int, float))]))
@@ -21,7 +24,7 @@ class Multiplication(BinaryOperator):
             remaining_factors.insert(0, numeric_product)
         if len(remaining_factors) == 1:
             return remaining_factors[0]  # If only one factor, return it
-            
+
         return self._group_as_binary_multiplication(remaining_factors)
 
     def _group_as_binary_multiplication(self, factors):
@@ -30,6 +33,8 @@ class Multiplication(BinaryOperator):
         Takes a list of factors and returns a Multiplication object that respects binary structure
         """
         if len(factors) == 2:
+            if factors[0] == Number(1) and isinstance(factors[1], Power): # handle the case of 1*(x^n) -> (x^n)
+                return factors[1]
             return Multiplication(factors[0], factors[1])
         else:
             # Recursively group factors: Multiplication(left, Multiplication(remain factors))
@@ -68,7 +73,7 @@ class Multiplication(BinaryOperator):
                 if exponent == 1:
                     result.append(Symbol(factor))
                 else:
-                    result.append(Power(Symbol(factor), Number(exponent)))  # x^n can be written as x * x * x ...
+                    result.append(Power(Symbol(factor), Number(exponent)))  # x^n can be written as x * x * x ...\
         return result
 
     def _product(self, factors):

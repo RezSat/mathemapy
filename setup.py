@@ -4,7 +4,13 @@ x = Symbol('x')
 y = Symbol('x')
 expr = Multiplication(x, y)
 result = expr.evaluate()
-print(result == Power(Symbol('x'), Number(2))) # x * x = x^2
+
+u = Power(Symbol('x'), Number(2))
+print(result == u) # x * x = x^2
 print(result)
-print( Power(Symbol('x'), Number(2)))
-print(expr)
+print( u)
+print(type(u.exponent) )
+print(result.exponent)
+
+p = Number(2)
+print(p==2)

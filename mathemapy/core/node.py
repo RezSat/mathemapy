@@ -4,9 +4,7 @@ class Node:
         return True
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self._compare_same_type(other)
-        return False
+        return self._compare_same_type(other)
 
     def _compare_same_type(self, other):
         """This method should be overridden in subclasses for comparing objects of the same type."""

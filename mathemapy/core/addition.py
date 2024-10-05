@@ -13,6 +13,9 @@ class Addition(BinaryOperator):
         flat_terms = self._flattern(left,right)
         self.terms = self._collect_like_terms(flat_terms)
 
+    def _compare_same_type(self, other):
+        return isinstance(other, Addition) and self.terms == other.terms
+
     def evaluate(self):
         evaluated_terms = [ term.evaluate() if isinstance(term, Node) else term for term in self.terms ]
         numeric_sum = Number(sum([term for term in evaluated_terms if isinstance(term, (int, float))]))

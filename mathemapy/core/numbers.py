@@ -12,6 +12,10 @@ class Number(Node):
         return self.value
 
     def _compare_same_type(self, other):
+        if isinstance(other, int):
+            return self.value == other
+        if isinstance(other, float):
+            return self.value == other
         return self.value == other.value
 
     def __hash__(self):

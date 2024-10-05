@@ -16,6 +16,9 @@ class Division(BinaryOperator):
         super().__init__(left, right)
         self.numerator, self.denominator = self._flattern(left, right)
 
+    def _compare_same_type(self, other):
+        return isinstance(other, Division) and self.numerator == other.numerator and self.denominator == other.denominator
+
     def evaluate(self):
         evaluated_numerator = self.numerator.evaluate() if isinstance(self.numerator, Node) else self.numerator
         evaluated_denominator = self.denominator.evaluate() if isinstance(self.denominator, Node) else self.denominator

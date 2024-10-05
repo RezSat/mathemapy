@@ -26,8 +26,10 @@ This is created as the base protoype model for the "Mathematishia Computer Algeb
 
 
 TODO ::
+create more expressions to handle test cases,
+add the step support to the basic operations
+add language feature
 
-Symbol('x') == Symbol('x) returns False fix that?
 
 Considerations -> Do we really need BinaryOperator and UnaryOperator ? instead try to get ideas from sympy or mathjs and mathsteps
 -->
