@@ -1,6 +1,8 @@
 from .node import Node
 
 class Symbol(Node):
+    is_Symbol = True
+    is_symbol = True
 
     def __init__(self, name, **assumptions):
         self.name = name
