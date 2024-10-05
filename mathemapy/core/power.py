@@ -39,6 +39,3 @@ class Power(BinaryOperator):
         if isinstance(exponent, Power):
             _, exponent = exponent._flattern(exponent.base, exponent.exponent)
         return base, exponent
-
-    def __repr__(self):
-        return f"{repr(self.base)} ^ {repr(self.exponent)}"

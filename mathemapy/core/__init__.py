@@ -5,7 +5,8 @@ from .symbol import Symbol, Dummy, Wild
 from .addition import Addition
 from .subtraction import Subtraction
 from .multiplication import Multiplication
-from .division import Division
+from .division import Division, DivisionByZeroError
+from .power import Power
 
 __all__ = [
     'Node',
@@ -22,5 +23,7 @@ __all__ = [
     'Subtraction',
     'Multiplication',
     'Division',
+    'DivisionByZeroError',
+    'Power',
 
 ]

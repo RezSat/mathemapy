@@ -40,6 +40,3 @@ class Division(BinaryOperator):
         if isinstance(denominator, Division):
             _, denominator = denominator._flattern(denominator.numerator, denominator.denominator)
         return numerator, denominator
-
-    def __repr__(self):
-        return f"{repr(self.numerator)} / {repr(self.denominator)}"

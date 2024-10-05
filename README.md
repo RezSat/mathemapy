@@ -27,9 +27,6 @@ This is created as the base protoype model for the "Mathematishia Computer Algeb
 
 TODO ::
 
-update subtraction, multiplication and division like the addition
-properly constrcut the expoenentiation or power( create an alias for the exp and power so they can be use with both terms)
-
 Symbol('x') == Symbol('x) returns False fix that?
 
 Considerations -> Do we really need BinaryOperator and UnaryOperator ? instead try to get ideas from sympy or mathjs and mathsteps

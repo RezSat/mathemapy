@@ -2,11 +2,12 @@ from .operators import BinaryOperator
 from .numbers import Number
 from .symbol import Symbol
 from .multiplication import Multiplication
+from .power import Power
 from .node import Node
 
 class Addition(BinaryOperator):
     symbol = '+'
-    
+
     def __init__(self, left, right):
         super().__init__(left, right)
         flat_terms = self._flattern(left,right)

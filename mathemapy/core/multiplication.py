@@ -45,12 +45,14 @@ class Multiplication(BinaryOperator):
 
     def _collect_like_factors(self, factors):
         collected = {}
+        
         for factor in factors:
             if isinstance(factor, Number):
                 collected['number'] = collected.get('number', 1) * factor.value  # Multiply numbers
             elif isinstance(factor, Symbol):
                 if factor.name in collected:
                     collected[factor.name] += 1  # Increment exponent
+                    print(collected[factor.name])
                 else:
                     collected[factor.name] = 1
             else:
