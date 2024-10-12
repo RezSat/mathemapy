@@ -7,6 +7,7 @@ from .subtraction import Subtraction
 from .multiplication import Multiplication
 from .division import Division, DivisionByZeroError
 from .power import Power
+from .negation import Negate
 
 __all__ = [
     'Node',
@@ -25,5 +26,6 @@ __all__ = [
     'Division',
     'DivisionByZeroError',
     'Power',
+    'Negate',
 
 ]

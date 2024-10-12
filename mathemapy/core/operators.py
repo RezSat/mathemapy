@@ -46,6 +46,12 @@ class UnaryOperator(Operator):
         self().__init__()
         self.operand = operand
 
+    def _get_hash_value(self):
+        return self.operand
+
+    def _compare_same_type(self, other):
+        return isinstance(other, UnaryOperator) and self.operand == other.operand
+
     def __repr__(self):
         return f"({self.symbol}{repr(self.operand)})"
 

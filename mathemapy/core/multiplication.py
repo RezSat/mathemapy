@@ -82,3 +82,10 @@ class Multiplication(BinaryOperator):
         for factor in factors:
             product *= factor
         return product
+
+    def __repr__(self):
+        if isinstance(self.left, Number) and isinstance(self.right, (Symbol)):
+            return f"{self.left}{self.right}"
+        if isinstance(self.left, (Symbol)) and isinstance(self.right, Number):
+            return f"{self.right}{self.left}"
+        return f"({repr(self.left)} {self.symbol} {repr(self.right)})"

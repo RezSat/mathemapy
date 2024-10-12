@@ -1,12 +1,20 @@
 from .operators import UnaryOperator
 from .numbers import Number
+from .symbol import Symbol
+from .multiplication import Multiplication
 
-class Negation(UnaryOperator):
+class Negate(UnaryOperator):
     symbol = '-'
 
-    def evaluate(self):
-        operand_val = self.operand.evaluate()
+    def __init__(self, operand):
+        self.operand = operand
+        if isinstance(operand, Number):
+            self.operand = Number(-operand.value)
+        if isinstance(operand, Symbol):
+            self.operand = Multiplication(Number(-1), operand)
 
-        if isinstance(operand_val, (int, float)):
-            return Number(-operand_val)
-        return self #Return the Node itself if not fully evaluatable
+    def evaluate(self):
+        return self.operand
+
+    def __repr__(self):
+        return f"-{self.operand}"
