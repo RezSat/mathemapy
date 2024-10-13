@@ -13,6 +13,20 @@ y = Symbol('y')
 num1 = Number(5)
 num2 = Number(3)
 
+class LikeTerms():
+    def __init__(self, _dict):
+        self.__dict__.update(_dict)
+
+    @property
+    def terms(self):
+        return list(self.__dict__.keys())
+
+    def _is_there(self, term):
+        return True if term in self.terms else False
+
+    def __repr__(self):
+        return str(self.__dict__)
+
 class Subtraction(BinaryOperator):
     symbol = '-'
 
@@ -20,12 +34,35 @@ class Subtraction(BinaryOperator):
         e_left = self.left.evaluate() if not isinstance(self.left, Symbol) else self.left
         e_right = self.right.evaluate() if not isinstance(self.right, Symbol) else self.right
 
-        if isinstance(e_left, (int, float, Number)) and isinstance(e_right, (int, float, Number)):
+
+        if isinstance(e_left, (int, float)) and isinstance(e_right, (int, float)):
             return Number(e_left - e_right)
 
-        
+        if isinstance(e_right, LikeTerms):
+            if e_right._is_there()
+        return self._collect_like_terms(e_left, e_right)
 
-        return Addition(e_left, Negate(e_right))
+    def _collect_like_terms(self, *terms):
+        collectd = {}
+        for term in terms:
+            if isinstance(term, Symbol):
+                # collect symbols
+                if term.name  in collectd:
+                    collectd[term.name] -= 1 # Decrease the coefficient
+                else:
+                    collectd[term.name] = 1
+            
+        result = []
+        for term, coeff in collectd.items():
+            if coeff == 0:
+                result.append(Number(0))
+            elif coeff == 1:
+                result.append(Symbol(term))
+            else:
+                result.append(Multiplication(Number(coeff), Symbol(term)))
+
+        return LikeTerms(collectd)
+                
 
 
 
@@ -79,6 +116,16 @@ well then arisses a little problem which is this:
 sub(3,sub(2,x))
 right doesn't get evaluated?
 so we need to do the collect like terms and bunch of other stuffs
+
+
+here is  an idea:
+
+create a separate  class to hold like terms, symbols and it's coefficient values
+then use this under recursion to determine similar terms in nested subs as this object now
+can be passed easily through out the tree with just instance recognition unlike recognizing
+of dicts since this is a separate class there won't be any mismatch when checking 
+for instances even in the future expansions.
+
 
 """
 

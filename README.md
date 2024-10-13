@@ -16,4 +16,11 @@ re-write the entire subtraction class from scratch, don't rely ln addition class
 
 definealty re-write the entire subtraction class from scratch, this time no trying to copy addition and reversing it :))
 Considerations -> Do we really need BinaryOperator and UnaryOperator ? instead try to get ideas from sympy or mathjs and mathsteps
+
+## TO COSNIDER:
+when doing all the evaluation and calculations isntead of using int, float consider
+to stick with Number class instead or explicitly use Integer or Float class from the 
+package itself so modification will be easier to handle since every component in here
+are custom builds
+
 -->
