@@ -10,12 +10,12 @@ class Subtraction(BinaryOperator):
 
     def __init__(self, left, right):
         super().__init__(left, right)
-        flat_terms = self._flattern(left, Negate(right))
+        flat_terms = self._flattern(left,right)
         self.terms = self._collect_like_terms(flat_terms)
 
     def evaluate(self):
         evaluated_terms = [term.evaluate() if isinstance(term, Node) else term for term in self.terms]
-        numeric_difference = evaluated_terms[0] if isinstance(evaluated_terms[0], (int, float, Number)) else Number(evaluated_terms[0])
+        numeric_difference = evaluated_terms[0] if isinstance(evaluated_terms[0], (int, float)) else Number(evaluated_terms[0])
 
         #Subtract all numerice terms
         for term in evaluated_terms[1:]:
@@ -45,13 +45,19 @@ class Subtraction(BinaryOperator):
             #Recursively groyp terms: Sutraction(lft, Subtration(remain terms..))
             return Subtraction(terms[0], self._group_as_binary_subtraction(terms[1:]))
     
-    def _flattern(self, *terms):
+    def _flattern(self, left, right):
         operands = []
-        for term in terms:
-            if isinstance(term, Subtraction):
-                operands.extend(term._flattern(term.left, term.right))
-            else:
-                operands.append(term)
+        if isinstance(left, BinaryOperator):
+            operands.extend(left._flattern(left.left, left.right))
+        if isinstance(right, BinaryOperator):
+            operands.extend(right._flattern(right.left, right.right))
+        try:
+            operands.append(left)
+        except:
+            operands.append(Negate(right))
+        else:
+            pass
+  
         return operands
 
     def _collect_like_terms(self,terms):

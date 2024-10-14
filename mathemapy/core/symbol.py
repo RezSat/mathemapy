@@ -4,8 +4,9 @@ class Symbol(Node):
     is_Symbol = True
     is_symbol = True
 
-    def __init__(self, name, **assumptions):
+    def __init__(self, name, coefficient=1,**assumptions):
         self.name = name
+        self.coefficient = coefficient
         self.assumptions = self._sanitize(assumptions)
 
     def _get_hash_value(self):

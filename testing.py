@@ -34,12 +34,13 @@ class Subtraction(BinaryOperator):
         e_left = self.left.evaluate() if not isinstance(self.left, Symbol) else self.left
         e_right = self.right.evaluate() if not isinstance(self.right, Symbol) else self.right
 
-
         if isinstance(e_left, (int, float)) and isinstance(e_right, (int, float)):
             return Number(e_left - e_right)
 
         if isinstance(e_right, LikeTerms):
-            if e_right._is_there()
+            if e_right._is_there():
+                pass
+
         return self._collect_like_terms(e_left, e_right)
 
     def _collect_like_terms(self, *terms):
@@ -48,7 +49,7 @@ class Subtraction(BinaryOperator):
             if isinstance(term, Symbol):
                 # collect symbols
                 if term.name  in collectd:
-                    collectd[term.name] -= 1 # Decrease the coefficient
+                    collectd[term.name] -= 1 #Decrease the coefficient
                 else:
                     collectd[term.name] = 1
             
@@ -65,10 +66,11 @@ class Subtraction(BinaryOperator):
                 
 
 
-
-expr = Subtraction(x, Subtraction(x, Subtraction(num1, num2))) # x - (y - (5 - 3)) -> x - (y - 2)
+expr = Addition(x, Negate(Addition(x, Negate(Addition(num1, Negate(num2).evaluate())).evaluate())).evaluate()) # x - (x - (5 - 3)) ->  x - (x - (2)) -> x -x +2 -> 2
 print(expr)
 print(expr.evaluate())
+
+
 """
 
 so the idea  is to subtract these at once:

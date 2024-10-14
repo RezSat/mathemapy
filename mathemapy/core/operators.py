@@ -53,5 +53,5 @@ class UnaryOperator(Operator):
         return isinstance(other, UnaryOperator) and self.operand == other.operand
 
     def __repr__(self):
-        return f"({self.symbol}{repr(self.operand)})"
+        return f"({repr(self.operand)})"
 

@@ -7,14 +7,12 @@ class Negate(UnaryOperator):
     symbol = '-'
 
     def __init__(self, operand):
+        from .addition import Addition
         self.operand = operand
         if isinstance(operand, Number):
             self.operand = Number(-operand.value)
-        if isinstance(operand, Symbol):
+        if isinstance(operand, (Symbol, Multiplication, Addition)):
             self.operand = Multiplication(Number(-1), operand)
 
     def evaluate(self):
         return self.operand
-
-    def __repr__(self):
-        return f"-{self.operand}"

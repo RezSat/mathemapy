@@ -66,7 +66,6 @@ class Addition(BinaryOperator):
                         collected[base.name] = coeff.value
             else:
                 collected[term] = collected.get(term, 0) + 1
-
         # Rebuild terms based on collected results
         result = []
         if 'number' in collected and collected['number'] != 0:
