@@ -14,4 +14,4 @@ class Symbol:
         return Subtraction(self, other)
 
     def __repr__(self):
-        return str(name)
+        return str(self.name)
