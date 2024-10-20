@@ -23,6 +23,26 @@ class Symbol(Node):
     def evaluate(self):
         return self.name
 
+    def __add__(self, other):
+        from .addition import Addition
+        return Addition(self, other)
+
+    def __sub__(self, other):
+        from .subtraction import Subtraction
+        return Subtraction(self, other)
+
+    def __mul__(self, other):
+        from .multiplication import Multiplication
+        return Multiplication(self, other)
+
+    def __truediv__(self, other):
+        from .division import Division
+        return Division(self, other)
+
+    def __pow__(self, other):
+        from .power import Power
+        return Power(self, other)
+        
     def __repr__(self):
         return self.name
 
