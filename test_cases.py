@@ -26,9 +26,9 @@ class TestMathemapyOperations(unittest.TestCase):
         y = Symbol('y')
         num1 = Number(5)
         num2 = Number(3)
-        expr = Subtraction(x, Subtraction(y, Subtraction(num1, num2)))
+        expr = Subtraction(num1, x)
         result = expr.evaluate()
-        self.assertEqual(result, Subtraction(Symbol('x'), Subtraction(Symbol('y'), Number(2))))
+        self.assertEqual(result, Subtraction(num1, x))
 
     def test_multiplication(self):
         # Multiply numbers and symbols

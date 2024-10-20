@@ -16,7 +16,9 @@ class Number(Node):
             return self.value == other
         if isinstance(other, float):
             return self.value == other
-        return self.value == other.value
+        if isinstance(other, Number):
+            return self.value == other.value
+        return False
 
     def __hash__(self):
         return hash((self.__class__, self._get_hash_value()))
