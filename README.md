@@ -23,4 +23,9 @@ to stick with Number class instead or explicitly use Integer or Float class from
 package itself so modification will be easier to handle since every component in here
 are custom builds
 
+
+## CONSIDER REMOVING 
+
+even though the sympy is an requirement inside the requirements.txt, we should not use sympy and try to rewrite everything
+from scratch as much as possible this is for my own learnig as well so rewritng from scratch would help me a lot in this case
 -->
