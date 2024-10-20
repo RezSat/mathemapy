@@ -1,8 +1,16 @@
 class Addition:
-    def __init__(self, *args):
-        self.operands = args
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
     def evaluate(self):
-        from 
-        # considering all are just integers and flaots
-        return sum(self.operands)
+        from .number import Number
+        from .symbol import Symbol
+        
+        e_left = self.left.evaluate()
+        e_right = self.right.evaluate()
+
+        return Number(e_left + e_right)
+
+    def __repr__(self):
+        return f"({self.left} + {self.right})"
