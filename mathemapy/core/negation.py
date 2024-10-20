@@ -17,4 +17,6 @@ class Negate(UnaryOperator):
         return self.operand
 
     def __repr__(self):
+        if isinstance(self.operand, (Symbol, Multiplication, Number)):
+            return f"{self.operand}"
         return f"-{self.operand}"

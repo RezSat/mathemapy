@@ -6,13 +6,15 @@ from mathemapy import (
     Multiplication,
     Negate,
     or_viceversa,
-    Addition
+    Addition,
+    Subtraction
 )
 x = Symbol('x')
 y = Symbol('y')
 num1 = Number(5)
 num2 = Number(3)
 
+"""
 class LikeTerms():
     def __init__(self, _dict):
         self.__dict__.update(_dict)
@@ -65,8 +67,8 @@ class Subtraction(BinaryOperator):
                 
 
 
-
-expr = Subtraction(x, Subtraction(x, Subtraction(num1, num2))) # x - (y - (5 - 3)) -> x - (y - 2)
+"""
+expr = Subtraction(x, Subtraction(y, Subtraction(num1, num2))) # x - (y - (5 - 3)) -> x - (y - 2)
 print(expr)
 print(expr.evaluate())
 """
@@ -127,6 +129,19 @@ of dicts since this is a separate class there won't be any mismatch when checkin
 for instances even in the future expansions.
 
 
+
+the idea of using nested operators should only introduce if and only if there are parenthesis
+like for example
+
+this  : 1+2+3 -> Add(1,2,3)
+but : 1+(2+3) -> Add(1, Add(2,3)) -> although this is techinically the same this will keep the precedence clean
+
+all operators will do  flatterning so there want be any problems here and there
+
+for cases like these:
+
+    1-2+3-5 
+    we just do this: Subtract(1, )
 """
 
 

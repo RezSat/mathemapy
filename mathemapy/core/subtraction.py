@@ -10,7 +10,7 @@ class Subtraction(BinaryOperator):
 
     def __init__(self, left, right):
         super().__init__(left, right)
-        flat_terms = self._flattern(left, Negate(right))
+        flat_terms = self._flattern(left, right)
         self.terms = self._collect_like_terms(flat_terms)
 
     def evaluate(self):
@@ -46,12 +46,41 @@ class Subtraction(BinaryOperator):
             return Subtraction(terms[0], self._group_as_binary_subtraction(terms[1:]))
     
     def _flattern(self, *terms):
+        # terms[0] -> left node
+        # terms[1] -> right node -> should negate
+        # for now we just do this manually
+
         operands = []
-        for term in terms:
-            if isinstance(term, Subtraction):
-                operands.extend(term._flattern(term.left, term.right))
+        if isinstance(terms[0], Subtraction):
+            operands.extend(terms[0]._flattern(terms[0].left, terms[0].right))
+        # this code will be same for term[1] and this handles the cases like
+        # Negate(Subtraction())
+        # because we know that if a right node is subtraction node it will be auto negate
+        # and do a flattern again so there will be a neagtion node next run instead of a subtraction node
+        # so that if this code was not here that negation of the subtraction node wil not be handled.abs
+
+        # latter at some point we neeed to generalize all of these but for now doing it manually
+
+        elif isinstance(terms[0], Negate):
+            if isinstance(terms[0].operand, Subtraction):
+                operands.extend(terms[0].operand._flattern(Negate(terms[0].operand.left), Negate(terms[0].operand.right)))
             else:
-                operands.append(term)
+                operands.append(terms[0])
+        else:
+            operands.append(terms[0])
+
+        if isinstance(terms[1], Subtraction):
+            # since this is the right node, both left and right node belongs here
+            # will subjected to a negation
+            operands.extend(terms[1]._flattern(Negate(terms[1].left), Negate(terms[1].right)))
+        elif isinstance(terms[1], Negate):
+            if isinstance(terms[1].operand, Subtraction):
+                operands.extend(terms[1].operand._flattern(Negate(terms[1].operand.left), Negate(terms[1].operand.right)))
+            else:
+                operands.append(terms[1])
+        else:
+            operands.append(Negate(terms[1])) # we negate each right term.
+        print(operands)
         return operands
 
     def _collect_like_terms(self,terms):
