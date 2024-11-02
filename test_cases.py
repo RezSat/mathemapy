@@ -236,56 +236,72 @@ class Div(Expression):
             return Number(0)
         
         # x/x = 1 (if x ≠ 0)
-        if left_simple == right_simple:
+        if str(left_simple) == str(right_simple):
             return Number(1)
-        
-        # Handle division of products to cancel common factors
-        if isinstance(left_simple, Mul) and isinstance(right_simple, Mul):
-            num_terms = defaultdict(lambda: Number(0))
-            den_terms = defaultdict(lambda: Number(0))
+
+        # Convert expressions to a canonical form of products
+        def get_factors(expr):
+            factors = defaultdict(lambda: Number(0))
+            coefficient = Number(1)
             
-            def collect_factors(expr, terms):
-                if isinstance(expr, Mul):
-                    collect_factors(expr.left, terms)
-                    collect_factors(expr.right, terms)
+            def collect(e, power=Number(1)):
+                nonlocal coefficient
+                if isinstance(e, Number):
+                    coefficient = Number(coefficient.value * e.value)
+                elif isinstance(e, Mul):
+                    collect(e.left, power)
+                    collect(e.right, power)
+                elif isinstance(e, Pow):
+                    if isinstance(e.right, Number):
+                        collect(e.left, Number(power.value * e.right.value))
+                    else:
+                        factors[e] = Number(factors[e].value + power.value)
                 else:
-                    terms[expr] = Number(terms[expr].value + 1)
+                    factors[e] = Number(factors[e].value + power.value)
             
-            collect_factors(left_simple, num_terms)
-            collect_factors(right_simple, den_terms)
-            
-            # Cancel common factors
-            for term in list(num_terms.keys()):
-                if term in den_terms:
-                    min_power = min(num_terms[term].value, den_terms[term].value)
-                    num_terms[term] = Number(num_terms[term].value - min_power)
-                    den_terms[term] = Number(den_terms[term].value - min_power)
-                    
-                    if num_terms[term].value == 0:
-                        del num_terms[term]
-                    if den_terms[term].value == 0:
-                        del den_terms[term]
-            
-            # Reconstruct numerator and denominator
-            num_result = None
-            den_result = None
-            
-            for term, power in sorted(num_terms.items(), key=lambda x: str(x[0])):
-                expr = term if power.value == 1 else Pow(term, power)
-                num_result = expr if num_result is None else Mul(num_result, expr)
-                
-            for term, power in sorted(den_terms.items(), key=lambda x: str(x[0])):
-                expr = term if power.value == 1 else Pow(term, power)
-                den_result = expr if den_result is None else Mul(den_result, expr)
-            
-            if num_result is None:
-                num_result = Number(1)
-            if den_result is None:
-                return num_result
-                
-            return Div(num_result, den_result)
+            collect(expr)
+            return coefficient, factors
+
+        num_coeff, num_factors = get_factors(left_simple)
+        den_coeff, den_factors = get_factors(right_simple)
         
-        return Div(left_simple, right_simple)
+        # Handle division of coefficients
+        if den_coeff.value == 0:
+            raise ZeroDivisionError("Division by zero")
+        result_coeff = Number(num_coeff.value / den_coeff.value)
+        
+        # Cancel common factors
+        for factor in list(num_factors.keys()):
+            if factor in den_factors:
+                min_power = min(num_factors[factor].value, den_factors[factor].value)
+                num_factors[factor] = Number(num_factors[factor].value - min_power)
+                den_factors[factor] = Number(den_factors[factor].value - min_power)
+                
+                if num_factors[factor].value == 0:
+                    del num_factors[factor]
+                if den_factors[factor].value == 0:
+                    del den_factors[factor]
+        
+        # Reconstruct the result
+        def build_expression(coeff, factors):
+            result = None
+            for base, power in sorted(factors.items(), key=lambda x: str(x[0])):
+                term = base if power.value == 1 else Pow(base, power)
+                result = term if result is None else Mul(result, term)
+            return result if result is not None else Number(1)
+        
+        num_result = build_expression(Number(1), num_factors)
+        den_result = build_expression(Number(1), den_factors)
+        
+        # Apply coefficient
+        if result_coeff.value != 1:
+            num_result = Mul(result_coeff, num_result)
+        
+        # If denominator is 1, return just the numerator
+        if isinstance(den_result, Number) and den_result.value == 1:
+            return num_result
+            
+        return Div(num_result, den_result)
 
     def __str__(self):
         return f"({self.left} / {self.right})"
@@ -422,4 +438,4 @@ test4 = Pow(Pow(x, Number(2)), Number(3))
 print(f"(x^2)^3 = {test4.simplify()}")  # Should output: (x ^ 6)
 
 test5 = (x * x * y) / (x * y)
-print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x
+print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x, 
