@@ -1,4 +1,11 @@
 from abc import ABC, abstractmethod
 
 class Expression(ABC):
-    pass
+
+    @abstractmethod
+    def evaluate(self):
+        pass
+    
+    @abstractmethod
+    def __str__(self):
+        pass
