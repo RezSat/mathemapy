@@ -147,22 +147,52 @@ class Mul(Expression):
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()
         
-        # If both operands are numbers, compute the result
-        if isinstance(left_simple, Number) and isinstance(right_simple, Number):
-            return Number(left_simple.value * right_simple.value)
+        # Collect terms for multiplication
+        terms = defaultdict(lambda: Number(0))  # For exponents
+        coefficient = Number(1)
         
-        # If either operand is zero, return zero
-        if (isinstance(left_simple, Number) and left_simple.value == 0) or \
-           (isinstance(right_simple, Number) and right_simple.value == 0):
+        def collect_factors(expr, power=Number(1)):
+            nonlocal coefficient
+            if isinstance(expr, Number):
+                coefficient = Number(coefficient.value * expr.value)
+            elif isinstance(expr, Mul):
+                collect_factors(expr.left)
+                collect_factors(expr.right)
+            elif isinstance(expr, Pow):
+                base = expr.left
+                if isinstance(expr.right, Number):
+                    collect_factors(base, expr.right)
+                else:
+                    terms[expr] = Number(terms[expr].value + power.value)
+            else:
+                terms[expr] = Number(terms[expr].value + power.value)
+        
+        collect_factors(left_simple)
+        collect_factors(right_simple)
+        
+        # If coefficient is 0, return 0
+        if coefficient.value == 0:
             return Number(0)
         
-        # If either operand is one, return the other operand
-        if isinstance(left_simple, Number) and left_simple.value == 1:
-            return right_simple
-        if isinstance(right_simple, Number) and right_simple.value == 1:
-            return left_simple
+        # Construct the result
+        result = None
+        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))
         
-        return Mul(left_simple, right_simple)
+        for base, exponent in sorted_terms:
+            if exponent.value == 0:
+                continue
+                
+            term = base if exponent.value == 1 else Pow(base, exponent)
+            
+            if result is None:
+                result = term
+            else:
+                result = Mul(result, term)
+        
+        if result is None:
+            return coefficient
+        
+        return result if coefficient.value == 1 else Mul(coefficient, result)
 
     def __str__(self):
         return f"({self.left} * {self.right})"
@@ -187,11 +217,73 @@ class Div(Expression):
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()
         
+        # Handle division by zero
         if isinstance(right_simple, Number) and right_simple.value == 0:
             raise ZeroDivisionError("Division by zero")
         
+        # Handle numeric division
         if isinstance(left_simple, Number) and isinstance(right_simple, Number):
+            if right_simple.value == 0:
+                raise ZeroDivisionError("Division by zero")
             return Number(left_simple.value / right_simple.value)
+        
+        # x/1 = x
+        if isinstance(right_simple, Number) and right_simple.value == 1:
+            return left_simple
+        
+        # 0/x = 0 (if x ≠ 0)
+        if isinstance(left_simple, Number) and left_simple.value == 0:
+            return Number(0)
+        
+        # x/x = 1 (if x ≠ 0)
+        if left_simple == right_simple:
+            return Number(1)
+        
+        # Handle division of products to cancel common factors
+        if isinstance(left_simple, Mul) and isinstance(right_simple, Mul):
+            num_terms = defaultdict(lambda: Number(0))
+            den_terms = defaultdict(lambda: Number(0))
+            
+            def collect_factors(expr, terms):
+                if isinstance(expr, Mul):
+                    collect_factors(expr.left, terms)
+                    collect_factors(expr.right, terms)
+                else:
+                    terms[expr] = Number(terms[expr].value + 1)
+            
+            collect_factors(left_simple, num_terms)
+            collect_factors(right_simple, den_terms)
+            
+            # Cancel common factors
+            for term in list(num_terms.keys()):
+                if term in den_terms:
+                    min_power = min(num_terms[term].value, den_terms[term].value)
+                    num_terms[term] = Number(num_terms[term].value - min_power)
+                    den_terms[term] = Number(den_terms[term].value - min_power)
+                    
+                    if num_terms[term].value == 0:
+                        del num_terms[term]
+                    if den_terms[term].value == 0:
+                        del den_terms[term]
+            
+            # Reconstruct numerator and denominator
+            num_result = None
+            den_result = None
+            
+            for term, power in sorted(num_terms.items(), key=lambda x: str(x[0])):
+                expr = term if power.value == 1 else Pow(term, power)
+                num_result = expr if num_result is None else Mul(num_result, expr)
+                
+            for term, power in sorted(den_terms.items(), key=lambda x: str(x[0])):
+                expr = term if power.value == 1 else Pow(term, power)
+                den_result = expr if den_result is None else Mul(den_result, expr)
+            
+            if num_result is None:
+                num_result = Number(1)
+            if den_result is None:
+                return num_result
+                
+            return Div(num_result, den_result)
         
         return Div(left_simple, right_simple)
 
@@ -216,6 +308,7 @@ class Pow(Expression):
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()
         
+        # Handle numeric powers
         if isinstance(left_simple, Number) and isinstance(right_simple, Number):
             return Number(left_simple.value ** right_simple.value)
         
@@ -226,6 +319,15 @@ class Pow(Expression):
         # x^1 = x
         if isinstance(right_simple, Number) and right_simple.value == 1:
             return left_simple
+        
+        # Handle nested powers: (x^a)^b = x^(a*b)
+        if isinstance(left_simple, Pow):
+            new_exp = Mul(left_simple.right, right_simple).simplify()
+            return Pow(left_simple.left, new_exp).simplify()
+        
+        # 1^x = 1
+        if isinstance(left_simple, Number) and left_simple.value == 1:
+            return Number(1)
         
         return Pow(left_simple, right_simple)
 
@@ -300,3 +402,24 @@ print(f"2x + 3 + x + 2 = {expr4.simplify()}")  # Should output: ((3 * x) + 5)
 
 expr5 = Number(2) * x + Number(3) * x + Number(4) + Number(1)
 print(f"2x + 3x + 4 + 1 = {expr5.simplify()}")  # Should output: ((5 * x) + 5)
+
+x = Symbol('x')
+y = Symbol('y')
+
+# Test multiplication simplification
+test1 = (Number(2) * x) * (Number(3) * x)
+print(f"(2x)(3x) = {test1.simplify()}")  # Should output: (6 * (x ^ 2))
+
+test2 = x * y * x
+print(f"x*y*x = {test2.simplify()}")  # Should output: ((x ^ 2) * y)
+
+# Test division simplification
+test3 = (Number(2) * x * y) / (x * Number(2))
+print(f"(2xy)/(2x) = {test3.simplify()}")  # Should output: y
+
+# Test power simplification
+test4 = Pow(Pow(x, Number(2)), Number(3))
+print(f"(x^2)^3 = {test4.simplify()}")  # Should output: (x ^ 6)
+
+test5 = (x * x * y) / (x * y)
+print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x
