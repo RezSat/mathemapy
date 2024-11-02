@@ -61,6 +61,14 @@ class Add(Expression):
         # Combine like terms
         terms = defaultdict(lambda: Number(0))
         
+        def collect_terms(expr):
+            """Recursively collect terms from nested additions"""
+            if isinstance(expr, Add):
+                collect_terms(expr.left)
+                collect_terms(expr.right)
+            else:
+                add_term(expr)
+        
         def add_term(expr, coefficient=Number(1)):
             if isinstance(expr, Number):
                 terms[Number(1)] = Number(terms[Number(1)].value + expr.value)
@@ -77,12 +85,15 @@ class Add(Expression):
             else:
                 terms[expr] = Number(terms[expr].value + coefficient.value)
         
-        add_term(left_simple)
-        add_term(right_simple)
+        # Collect terms from both sides
+        collect_terms(left_simple)
+        collect_terms(right_simple)
         
         # Construct the simplified expression
         result = None
-        for term, coeff in terms.items():
+        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))  # Sort terms for consistent output
+        
+        for term, coeff in sorted_terms:
             if coeff.value == 0:
                 continue
             
@@ -269,5 +280,23 @@ print(expr1.simplify())  # Output: (2 * x)
 expr2 = Number(2) * x + Number(3) * x  # Should simplify to 5x
 print(expr2.simplify())  # Output: (5 * x)
 
-expr3 = x + Number(2) + x + Number(3)  # Should simplify to 2x + 5
-print(expr3.simplify())  # Output should be : ((2 * x) + 5), but output now is:(((x + 2) + x) + 3)
+x = Symbol('x')
+
+# Test case 1: Simple addition of like terms
+expr1 = x + x
+print(f"x + x = {expr1.simplify()}")  # Should output: (2 * x)
+
+# Test case 2: Addition with coefficients
+expr2 = Number(2) * x + Number(3) * x
+print(f"2x + 3x = {expr2.simplify()}")  # Should output: (5 * x)
+
+# Test case 3: Mixed terms with constants
+expr3 = x + Number(2) + x + Number(3)
+print(f"x + 2 + x + 3 = {expr3.simplify()}")  # Should output: ((2 * x) + 5)
+
+# Additional test cases
+expr4 = Number(2) * x + Number(3) + x + Number(2)
+print(f"2x + 3 + x + 2 = {expr4.simplify()}")  # Should output: ((3 * x) + 5)
+
+expr5 = Number(2) * x + Number(3) * x + Number(4) + Number(1)
+print(f"2x + 3x + 4 + 1 = {expr5.simplify()}")  # Should output: ((5 * x) + 5)
