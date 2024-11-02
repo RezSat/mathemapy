@@ -390,6 +390,144 @@ class Symbol(Expression):
     def __str__(self):
         return f"{self.name}"
     
+
+print("Edge Cases in Expression Handling:")
+
+# These cases might not be handled properly:
+x = Symbol('x')
+y = Symbol('y')
+
+# Test negative numbers and their simplification
+expr1 = Number(-2) * x + Number(-3) * x
+print(expr1.simplify())  # Should give (-5 * x)
+
+# Multiple negations
+expr2 = Number(-1) * (Number(-1) * x)
+print(expr2.simplify())  # Should give x
+
+# Zero handling in multiplication
+expr3 = Number(0) * (x + y)
+print(expr3.simplify())  # Should give 0
+
+# Power of zero handling
+expr4 = Pow(x, Number(0))
+print(expr4.simplify())  # Should give 1
+
+# Division by expressions containing zero
+expr5 = x / (y - y)
+# Should raise ZeroDivisionError when simplified
+try:
+    expr5.simplify()
+except ZeroDivisionError:
+    print("ZeroDivisionError")
+
+
+print("\n\nAssociativity Issues:")
+
+x = Symbol('x')
+y = Symbol('y')
+z = Symbol('z')
+
+# These expressions should give equivalent results but might not:
+expr1 = (x + y) + z
+expr2 = x + (y + z)
+print(expr1.simplify())
+print(expr2.simplify())
+
+# Same for multiplication
+expr3 = (x * y) * z
+expr4 = x * (y * z)
+print(expr3.simplify())
+print(expr4.simplify())
+
+print("\n\nCommutativity in Terms:")
+
+x = Symbol('x')
+y = Symbol('y')
+
+# These should simplify to the same expression:
+expr1 = x * y + y * x
+print(expr1.simplify())  # Should combine like terms
+
+expr2 = Number(2) * x * y + y * x * Number(3)
+print(expr2.simplify())  # Should give (5 * x * y)
+
+
+print("\n\nComplex Fraction Handling:")
+
+x = Symbol('x')
+y = Symbol('y')
+
+# Complex fraction simplification
+expr1 = (x/y) / (y/x)
+print(expr1.simplify())  # Should give (x^2 / y^2)
+
+# Multiple divisions
+expr2 = x / y / z
+print(expr2.simplify())  # Should handle proper association
+
+# Division of sums
+expr3 = (x + y) / (x + y)
+print(expr3.simplify())  # Should give 1
+
+
+print("\n\nPower Simplification Edge Cases:")
+
+x = Symbol('x')
+y = Symbol('y')
+
+# Power of power simplification
+expr1 = Pow(Pow(x, Number(2)), Pow(y, Number(2)))
+print(expr1.simplify())  # Should handle nested powers
+
+# Power distribution
+expr2 = Pow(x * y, Number(2))
+print(expr2.simplify())  # Should give (x^2 * y^2)
+
+# Zero base with positive exponent
+expr3 = Pow(Number(0), Number(5))
+print(expr3.simplify())  # Should give 0
+
+# Zero base with zero exponent
+expr4 = Pow(Number(0), Number(0))
+print(expr4.simplify())  # Should be undefined or raise an error
+
+
+print("\n\nError Handling Improvements:")
+x = Symbol('x')
+
+# Division by zero in more complex expressions
+expr1 = x / (x - x)  # Should raise ZeroDivisionError
+
+# Undefined mathematical operations
+expr2 = Pow(Number(0), Number(-1))  # Should raise appropriate error
+
+# Invalid operations
+expr3 = Pow(x, Number(1/2))  # How should fractional powers be handled?
+
+
+print('\n\nConsistent String Representation:')
+x = Symbol('x')
+y = Symbol('y')
+
+# Consistent parentheses usage
+expr1 = (x + y) * x
+expr2 = x * (x + y)
+print(expr1)  # Should have consistent parentheses placement
+
+# Number representation
+expr3 = Number(1.0) * x  # Should it print as 1 or 1.0?
+print(expr3)
+
+# Complex expression formatting
+expr4 = (x + y) * (x - y) / (x * y)
+print(expr4)  # Should be readable and unambiguous
+
+
+
+
+'''
+
 # Test cases
 x = Symbol('x')
 expr1 = x + x  # Should simplify to 2x
@@ -439,3 +577,4 @@ print(f"(x^2)^3 = {test4.simplify()}")  # Should output: (x ^ 6)
 
 test5 = (x * x * y) / (x * y)
 print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x, 
+'''
