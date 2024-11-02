@@ -1,12 +1,11 @@
-# here we go building the entire core in a single python file
 from abc import ABC, abstractmethod
-from typing import Union, List
+from typing import Union, List, Dict
+from collections import defaultdict
 
 class Expression(ABC):
     """
-    expression class is the parent for all other classes
+    Expression class is the parent for all other classes
     """
-
     @abstractmethod
     def evaluate(self):
         pass
@@ -22,7 +21,20 @@ class Expression(ABC):
     def __repr__(self):
         return self.__str__()
     
-# Operators
+    def __add__(self, other):
+        return Add(self, other)
+    
+    def __sub__(self, other):
+        return Sub(self, other)
+    
+    def __mul__(self, other):
+        return Mul(self, other)
+    
+    def __truediv__(self, other):
+        return Div(self, other)
+    
+    def __pow__(self, other):
+        return Pow(self, other)
 
 class Add(Expression):
     def __init__(self, left: Expression, right: Expression):
@@ -35,11 +47,59 @@ class Add(Expression):
 
         if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
             return Number(eval_left + eval_right)
-
-        return Add(eval_left, eval_right)
+        
+        return self.simplify()
     
     def simplify(self):
-        pass
+        left_simple = self.left.simplify()
+        right_simple = self.right.simplify()
+        
+        # If both operands are numbers, compute the result
+        if isinstance(left_simple, Number) and isinstance(right_simple, Number):
+            return Number(left_simple.value + right_simple.value)
+        
+        # Combine like terms
+        terms = defaultdict(lambda: Number(0))
+        
+        def add_term(expr, coefficient=Number(1)):
+            if isinstance(expr, Number):
+                terms[Number(1)] = Number(terms[Number(1)].value + expr.value)
+            elif isinstance(expr, Symbol):
+                terms[expr] = Number(terms[expr].value + coefficient.value)
+            elif isinstance(expr, Mul):
+                # Handle cases like 2*x + 3*x
+                if isinstance(expr.left, Number) and isinstance(expr.right, Symbol):
+                    terms[expr.right] = Number(terms[expr.right].value + expr.left.value)
+                elif isinstance(expr.right, Number) and isinstance(expr.left, Symbol):
+                    terms[expr.left] = Number(terms[expr.left].value + expr.right.value)
+                else:
+                    terms[expr] = Number(terms[expr].value + coefficient.value)
+            else:
+                terms[expr] = Number(terms[expr].value + coefficient.value)
+        
+        add_term(left_simple)
+        add_term(right_simple)
+        
+        # Construct the simplified expression
+        result = None
+        for term, coeff in terms.items():
+            if coeff.value == 0:
+                continue
+            
+            term_expr = None
+            if term == Number(1):
+                term_expr = coeff
+            elif coeff.value == 1:
+                term_expr = term
+            else:
+                term_expr = Mul(coeff, term)
+            
+            if result is None:
+                result = term_expr
+            else:
+                result = Add(result, term_expr)
+        
+        return result if result is not None else Number(0)
 
     def __str__(self):
         return f"({self.left} + {self.right})"
@@ -50,16 +110,10 @@ class Sub(Expression):
         self.right = right
 
     def evaluate(self):
-        eval_left = self.left.evaluate()
-        eval_right = self.right.evaluate()
-
-        if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
-            return Number(eval_left - eval_right)
-
-        return Add(eval_left, eval_right)
+        return Add(self.left, Mul(Number(-1), self.right)).evaluate()
     
     def simplify(self):
-        pass
+        return Add(self.left, Mul(Number(-1), self.right)).simplify()
 
     def __str__(self):
         return f"({self.left} - {self.right})"
@@ -76,14 +130,32 @@ class Mul(Expression):
         if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
             return Number(eval_left * eval_right)
 
-        return Add(eval_left, eval_right)
+        return self.simplify()
     
     def simplify(self):
-        pass
+        left_simple = self.left.simplify()
+        right_simple = self.right.simplify()
+        
+        # If both operands are numbers, compute the result
+        if isinstance(left_simple, Number) and isinstance(right_simple, Number):
+            return Number(left_simple.value * right_simple.value)
+        
+        # If either operand is zero, return zero
+        if (isinstance(left_simple, Number) and left_simple.value == 0) or \
+           (isinstance(right_simple, Number) and right_simple.value == 0):
+            return Number(0)
+        
+        # If either operand is one, return the other operand
+        if isinstance(left_simple, Number) and left_simple.value == 1:
+            return right_simple
+        if isinstance(right_simple, Number) and right_simple.value == 1:
+            return left_simple
+        
+        return Mul(left_simple, right_simple)
 
     def __str__(self):
         return f"({self.left} * {self.right})"
-    
+
 class Div(Expression):
     def __init__(self, left: Expression, right: Expression):
         self.left = left
@@ -94,12 +166,23 @@ class Div(Expression):
         eval_right = self.right.evaluate()
 
         if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
+            if eval_right == 0:
+                raise ZeroDivisionError("Division by zero")
             return Number(eval_left / eval_right)
 
-        return Add(eval_left, eval_right)
+        return self.simplify()
     
     def simplify(self):
-        pass
+        left_simple = self.left.simplify()
+        right_simple = self.right.simplify()
+        
+        if isinstance(right_simple, Number) and right_simple.value == 0:
+            raise ZeroDivisionError("Division by zero")
+        
+        if isinstance(left_simple, Number) and isinstance(right_simple, Number):
+            return Number(left_simple.value / right_simple.value)
+        
+        return Div(left_simple, right_simple)
 
     def __str__(self):
         return f"({self.left} / {self.right})"
@@ -116,22 +199,29 @@ class Pow(Expression):
         if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
             return Number(eval_left ** eval_right)
 
-        return Add(eval_left, eval_right)
+        return self.simplify()
     
     def simplify(self):
-        pass
+        left_simple = self.left.simplify()
+        right_simple = self.right.simplify()
+        
+        if isinstance(left_simple, Number) and isinstance(right_simple, Number):
+            return Number(left_simple.value ** right_simple.value)
+        
+        # x^0 = 1
+        if isinstance(right_simple, Number) and right_simple.value == 0:
+            return Number(1)
+        
+        # x^1 = x
+        if isinstance(right_simple, Number) and right_simple.value == 1:
+            return left_simple
+        
+        return Pow(left_simple, right_simple)
 
     def __str__(self):
         return f"({self.left} ^ {self.right})"
         
 class Number(Expression):
-    """
-    Number class will be the parent for both classes Integer and Float,
-    takes an argument of int, or float kind and return the number kind when simplified,
-    return an int or float kind when evaluated but needs to be able to work like sympy's 
-    number class
-    """
-
     def __init__(self, value: Union[int, float]):
         self.value = value
 
@@ -141,31 +231,18 @@ class Number(Expression):
     def simplify(self):
         return self
     
-    def __add__(self, other):
-        return Add(self, other)
+    def __eq__(self, other):
+        if isinstance(other, Number):
+            return self.value == other.value
+        return False
     
-    def __sub__(self, other):
-        return Sub(self, other)
-    
-    def __mul__(self, other):
-        return Mul(self, other)
-    
-    def __truediv__(self, other):
-        return Div(self, other)
-    
-    def __pow__(self, other):
-        return Pow(self, other)
+    def __hash__(self):
+        return hash(self.value)
     
     def __str__(self):
         return f"{self.value}"
-    
 
 class Symbol(Expression):
-    """
-    Symbol class will represent variable or unknowns kinds in math, 
-    they support all basic operations and other algebriac simplifications
-    """
-
     def __init__(self, name: str):
         self.name = name
 
@@ -175,28 +252,22 @@ class Symbol(Expression):
     def simplify(self):
         return self
     
-    def __add__(self, other):
-        return Add(self, other)
+    def __eq__(self, other):
+        return isinstance(other, Symbol) and self.name == other.name
     
-    def __sub__(self, other):
-        return Sub(self, other)
-    
-    def __mul__(self, other):
-        return Mul(self, other)
-    
-    def __truediv__(self, other):
-        return Div(self, other)
-    
-    def __pow__(self, other):
-        return Pow(self, other)
+    def __hash__(self):
+        return hash(self.name)
     
     def __str__(self):
         return f"{self.name}"
     
+# Test cases
+x = Symbol('x')
+expr1 = x + x  # Should simplify to 2x
+print(expr1.simplify())  # Output: (2 * x)
 
+expr2 = Number(2) * x + Number(3) * x  # Should simplify to 5x
+print(expr2.simplify())  # Output: (5 * x)
 
-
-
-t = Number(2) + Number(3)
-print(t)
-print(t.evaluate())
+expr3 = x + Number(2) + x + Number(3)  # Should simplify to 2x + 5
+print(expr3.simplify())  # Output should be : ((2 * x) + 5), but output now is:(((x + 2) + x) + 3)
