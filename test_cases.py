@@ -200,4 +200,3 @@ class Symbol(Expression):
 t = Number(2) + Number(3)
 print(t)
 print(t.evaluate())
-print(t.simplify())
