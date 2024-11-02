@@ -193,3 +193,11 @@ class Symbol(Expression):
     def __str__(self):
         return f"{self.name}"
     
+
+
+
+
+t = Number(2) + Number(3)
+print(t)
+print(t.evaluate())
+print(t.simplify())
