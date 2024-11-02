@@ -63,6 +63,26 @@ class Sub(Expression):
 
     def __str__(self):
         return f"({self.left} - {self.right})"
+    
+class Mul(Expression):
+    def __init__(self, left: Expression, right: Expression):
+        self.left = left
+        self.right = right
+
+    def evaluate(self):
+        eval_left = self.left.evaluate()
+        eval_right = self.right.evaluate()
+
+        if isinstance(eval_left, (int, float)) and isinstance(eval_right, (int, float)):
+            return Number(eval_left * eval_right)
+
+        return Add(eval_left, eval_right)
+    
+    def simplify(self):
+        pass
+
+    def __str__(self):
+        return f"({self.left} * {self.right})"
         
 class Number(Expression):
     """
