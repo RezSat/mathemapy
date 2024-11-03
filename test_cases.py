@@ -447,10 +447,10 @@ y = Symbol('y')
 
 # These should simplify to the same expression:
 expr1 = x * y + y * x
-print(expr1.simplify())  # Should combine like terms
+print(expr1.simplify())  # Should combine like terms, but result is : ((x * y) + (x * y))
 
 expr2 = Number(2) * x * y + y * x * Number(3)
-print(expr2.simplify())  # Should give (5 * x * y)
+print(expr2.simplify())  # Should give (5 * x * y), but result is : (2 * (x * y)) + (3 * (x * y)))
 
 
 print("\n\nComplex Fraction Handling:")
@@ -460,11 +460,11 @@ y = Symbol('y')
 
 # Complex fraction simplification
 expr1 = (x/y) / (y/x)
-print(expr1.simplify())  # Should give (x^2 / y^2)
+print(expr1.simplify())  # Should give (x^2 / y^2), but result is: ((x / y) / (y / x))
 
 # Multiple divisions
 expr2 = x / y / z
-print(expr2.simplify())  # Should handle proper association
+print(expr2.simplify())  # Should handle proper association, the result  is : ((x / y) / z)
 
 # Division of sums
 expr3 = (x + y) / (x + y)
@@ -478,11 +478,11 @@ y = Symbol('y')
 
 # Power of power simplification
 expr1 = Pow(Pow(x, Number(2)), Pow(y, Number(2)))
-print(expr1.simplify())  # Should handle nested powers
+print(expr1.simplify())  # Should handle nested powers, result is: (x ^ (2 * (y ^ 2)))
 
 # Power distribution
 expr2 = Pow(x * y, Number(2))
-print(expr2.simplify())  # Should give (x^2 * y^2)
+print(expr2.simplify())  # Should give (x^2 * y^2), but result is: ((x * y) ^ 2) maybe this is okay, but add some method like `alternaive` so that the other result will also can be print.
 
 # Zero base with positive exponent
 expr3 = Pow(Number(0), Number(5))
@@ -490,7 +490,7 @@ print(expr3.simplify())  # Should give 0
 
 # Zero base with zero exponent
 expr4 = Pow(Number(0), Number(0))
-print(expr4.simplify())  # Should be undefined or raise an error
+print(expr4.simplify())  # Should be undefined or raise an error, but result gives: 1
 
 
 print("\n\nError Handling Improvements:")
@@ -498,12 +498,21 @@ x = Symbol('x')
 
 # Division by zero in more complex expressions
 expr1 = x / (x - x)  # Should raise ZeroDivisionError
+try:
+    expr1.simplify()
+except ZeroDivisionError:
+    print("ZeroDivisionError")
 
 # Undefined mathematical operations
 expr2 = Pow(Number(0), Number(-1))  # Should raise appropriate error
+try:
+    expr2.simplify()
+except ZeroDivisionError:
+    print("ZeroDivisionError: 0.0 cannot be raised to a negative power")
 
 # Invalid operations
 expr3 = Pow(x, Number(1/2))  # How should fractional powers be handled?
+print(expr3.simplify()) # current output is (x ^ 0.5) ?? need to think how this shouild be handled, or we can also implement `alternative` method here as well so that it can output in other alternative formats like using fractional powers, root sign etc.
 
 
 print('\n\nConsistent String Representation:')
@@ -514,14 +523,15 @@ y = Symbol('y')
 expr1 = (x + y) * x
 expr2 = x * (x + y)
 print(expr1)  # Should have consistent parentheses placement
+print(expr2)
 
 # Number representation
 expr3 = Number(1.0) * x  # Should it print as 1 or 1.0?
-print(expr3)
+print(expr3) # curretly prints 1.0
 
 # Complex expression formatting
 expr4 = (x + y) * (x - y) / (x * y)
-print(expr4)  # Should be readable and unambiguous
+print(expr4)  # Should be readable and unambiguous, output is : (((x + y) * (x - y)) / (x * y))
 
 
 
