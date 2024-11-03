@@ -144,55 +144,66 @@ class Mul(Expression):
         return self.simplify()
     
     def simplify(self):
-        left_simple = self.left.simplify()
-        right_simple = self.right.simplify()
-        
-        # Collect terms for multiplication
-        terms = defaultdict(lambda: Number(0))  # For exponents
-        coefficient = Number(1)
-        
-        def collect_factors(expr, power=Number(1)):
-            nonlocal coefficient
-            if isinstance(expr, Number):
-                coefficient = Number(coefficient.value * expr.value)
-            elif isinstance(expr, Mul):
-                collect_factors(expr.left)
-                collect_factors(expr.right)
-            elif isinstance(expr, Pow):
-                base = expr.left
-                if isinstance(expr.right, Number):
-                    collect_factors(base, expr.right)
-                else:
-                    terms[expr] = Number(terms[expr].value + power.value)
-            else:
-                terms[expr] = Number(terms[expr].value + power.value)
-        
-        collect_factors(left_simple)
-        collect_factors(right_simple)
-        
-        # If coefficient is 0, return 0
-        if coefficient.value == 0:
-            return Number(0)
-        
-        # Construct the result
-        result = None
-        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))
-        
-        for base, exponent in sorted_terms:
-            if exponent.value == 0:
-                continue
+            left_simple = self.left.simplify()
+            right_simple = self.right.simplify()
+            
+            # Collect terms for multiplication
+            terms = []
+            coefficient = Number(1)
+            
+            def collect_factors(expr):
+                """Recursively collect factors, maintaining their structure"""
+                nonlocal coefficient
                 
-            term = base if exponent.value == 1 else Pow(base, exponent)
+                if isinstance(expr, Number):
+                    coefficient = Number(coefficient.value * expr.value)
+                elif isinstance(expr, Mul):
+                    collect_factors(expr.left)
+                    collect_factors(expr.right)
+                else:
+                    terms.append(expr)
+            
+            # Collect all factors
+            collect_factors(left_simple)
+            collect_factors(right_simple)
+            
+            # If coefficient is 0, return 0
+            if coefficient.value == 0:
+                return Number(0)
+            
+            # Sort terms for canonical form
+            # Convert terms to strings for sorting to ensure consistent ordering
+            terms.sort(key=lambda x: str(x))
+            
+            # Reconstruct the expression
+            result = None
+            
+            # Combine like terms
+            i = 0
+            while i < len(terms):
+                current_term = terms[i]
+                count = 1
+                j = i + 1
+                
+                # Look ahead for identical terms
+                while j < len(terms) and str(terms[j]) == str(current_term):
+                    count += 1
+                    j += 1
+                
+                # Add the term with its power if necessary
+                term = current_term if count == 1 else Pow(current_term, Number(count))
+                
+                if result is None:
+                    result = term
+                else:
+                    result = Mul(result, term)
+                
+                i = j
             
             if result is None:
-                result = term
-            else:
-                result = Mul(result, term)
-        
-        if result is None:
-            return coefficient
-        
-        return result if coefficient.value == 1 else Mul(coefficient, result)
+                return coefficient
+            
+            return result if coefficient.value == 1 else Mul(coefficient, result)
 
     def __str__(self):
         return f"({self.left} * {self.right})"
@@ -536,7 +547,7 @@ print(expr4)  # Should be readable and unambiguous, output is : (((x + y) * (x -
 
 
 
-'''
+
 
 # Test cases
 x = Symbol('x')
@@ -587,4 +598,4 @@ print(f"(x^2)^3 = {test4.simplify()}")  # Should output: (x ^ 6)
 
 test5 = (x * x * y) / (x * y)
 print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x, 
-'''
+
