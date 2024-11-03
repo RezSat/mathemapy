@@ -60,102 +60,55 @@ class Add(Expression):
         
         # Combine like terms
         terms = defaultdict(lambda: Number(0))
-        numeric_sum = Number(0)
-        
-        def get_term_key(expr):
-            """Get canonical form for term comparison"""
-            if isinstance(expr, Mul):
-                # Sort factors for canonical form
-                factors = []
-                def collect_factors(e):
-                    if isinstance(e, Mul):
-                        collect_factors(e.left)
-                        collect_factors(e.right)
-                    elif not isinstance(e, Number):
-                        factors.append(str(e))
-                collect_factors(expr)
-                factors.sort()
-                return tuple(factors)
-            elif isinstance(expr, Number):
-                return "number"
-            else:
-                return (str(expr),)
-        
-        def get_coefficient(expr):
-            """Extract coefficient from expression"""
-            if isinstance(expr, Number):
-                return expr.value
-            if isinstance(expr, Mul):
-                coeff = 1
-                def collect_coeff(e):
-                    nonlocal coeff
-                    if isinstance(e, Number):
-                        coeff *= e.value
-                    elif isinstance(e, Mul):
-                        collect_coeff(e.left)
-                        collect_coeff(e.right)
-                collect_coeff(expr)
-                return coeff
-            return 1
         
         def collect_terms(expr):
-            """Collect terms and coefficients"""
+            """Recursively collect terms from nested additions"""
             if isinstance(expr, Add):
                 collect_terms(expr.left)
                 collect_terms(expr.right)
             else:
-                nonlocal numeric_sum
-                coeff = get_coefficient(expr)
-                if isinstance(expr, Number):
-                    numeric_sum = Number(numeric_sum.value + coeff)
+                add_term(expr)
+        
+        def add_term(expr, coefficient=Number(1)):
+            if isinstance(expr, Number):
+                terms[Number(1)] = Number(terms[Number(1)].value + expr.value)
+            elif isinstance(expr, Symbol):
+                terms[expr] = Number(terms[expr].value + coefficient.value)
+            elif isinstance(expr, Mul):
+                # Handle cases like 2*x + 3*x
+                if isinstance(expr.left, Number) and isinstance(expr.right, Symbol):
+                    terms[expr.right] = Number(terms[expr.right].value + expr.left.value)
+                elif isinstance(expr.right, Number) and isinstance(expr.left, Symbol):
+                    terms[expr.left] = Number(terms[expr.left].value + expr.right.value)
                 else:
-                    key = get_term_key(expr)
-                    if key == "number":
-                        numeric_sum = Number(numeric_sum.value + coeff)
-                    else:
-                        terms[key] = Number(terms[key].value + coeff)
+                    terms[expr] = Number(terms[expr].value + coefficient.value)
+            else:
+                terms[expr] = Number(terms[expr].value + coefficient.value)
         
         # Collect terms from both sides
         collect_terms(left_simple)
         collect_terms(right_simple)
         
-        # Build result
+        # Construct the simplified expression
         result = None
+        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))  # Sort terms for consistent output
         
-        # Add symbolic terms
-        for key, coeff in sorted(terms.items()):
+        for term, coeff in sorted_terms:
             if coeff.value == 0:
                 continue
-                
-            if len(key) == 1:
-                # Single variable term
-                term = None
-                for expr in [left_simple, right_simple]:
-                    if isinstance(expr, Symbol) and str(expr) == key[0]:
-                        term = expr
-                        break
-                if term is None:
-                    continue
-            else:
-                # Multiplicative term
-                term = None
-                for factor_str in key:
-                    factor = None
-                    for expr in [left_simple, right_simple]:
-                        if str(expr) == factor_str:
-                            factor = expr
-                            break
-                    if factor is not None:
-                        term = factor if term is None else Mul(term, factor)
             
-            if term is not None:
-                if coeff.value != 1:
-                    term = Mul(Number(coeff.value), term)
-                result = term if result is None else Add(result, term)
-        
-        # Add numeric term if present
-        if numeric_sum.value != 0:
-            result = numeric_sum if result is None else Add(result, numeric_sum)
+            term_expr = None
+            if term == Number(1):
+                term_expr = coeff
+            elif coeff.value == 1:
+                term_expr = term
+            else:
+                term_expr = Mul(coeff, term)
+            
+            if result is None:
+                result = term_expr
+            else:
+                result = Add(result, term_expr)
         
         return result if result is not None else Number(0)
 
@@ -191,66 +144,55 @@ class Mul(Expression):
         return self.simplify()
     
     def simplify(self):
-            left_simple = self.left.simplify()
-            right_simple = self.right.simplify()
-            
-            # Collect terms for multiplication
-            terms = []
-            coefficient = Number(1)
-            
-            def collect_factors(expr):
-                """Recursively collect factors, maintaining their structure"""
-                nonlocal coefficient
-                
-                if isinstance(expr, Number):
-                    coefficient = Number(coefficient.value * expr.value)
-                elif isinstance(expr, Mul):
-                    collect_factors(expr.left)
-                    collect_factors(expr.right)
+        left_simple = self.left.simplify()
+        right_simple = self.right.simplify()
+        
+        # Collect terms for multiplication
+        terms = defaultdict(lambda: Number(0))  # For exponents
+        coefficient = Number(1)
+        
+        def collect_factors(expr, power=Number(1)):
+            nonlocal coefficient
+            if isinstance(expr, Number):
+                coefficient = Number(coefficient.value * expr.value)
+            elif isinstance(expr, Mul):
+                collect_factors(expr.left)
+                collect_factors(expr.right)
+            elif isinstance(expr, Pow):
+                base = expr.left
+                if isinstance(expr.right, Number):
+                    collect_factors(base, expr.right)
                 else:
-                    terms.append(expr)
-            
-            # Collect all factors
-            collect_factors(left_simple)
-            collect_factors(right_simple)
-            
-            # If coefficient is 0, return 0
-            if coefficient.value == 0:
-                return Number(0)
-            
-            # Sort terms for canonical form
-            # Convert terms to strings for sorting to ensure consistent ordering
-            terms.sort(key=lambda x: str(x))
-            
-            # Reconstruct the expression
-            result = None
-            
-            # Combine like terms
-            i = 0
-            while i < len(terms):
-                current_term = terms[i]
-                count = 1
-                j = i + 1
+                    terms[expr] = Number(terms[expr].value + power.value)
+            else:
+                terms[expr] = Number(terms[expr].value + power.value)
+        
+        collect_factors(left_simple)
+        collect_factors(right_simple)
+        
+        # If coefficient is 0, return 0
+        if coefficient.value == 0:
+            return Number(0)
+        
+        # Construct the result
+        result = None
+        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))
+        
+        for base, exponent in sorted_terms:
+            if exponent.value == 0:
+                continue
                 
-                # Look ahead for identical terms
-                while j < len(terms) and str(terms[j]) == str(current_term):
-                    count += 1
-                    j += 1
-                
-                # Add the term with its power if necessary
-                term = current_term if count == 1 else Pow(current_term, Number(count))
-                
-                if result is None:
-                    result = term
-                else:
-                    result = Mul(result, term)
-                
-                i = j
+            term = base if exponent.value == 1 else Pow(base, exponent)
             
             if result is None:
-                return coefficient
-            
-            return result if coefficient.value == 1 else Mul(coefficient, result)
+                result = term
+            else:
+                result = Mul(result, term)
+        
+        if result is None:
+            return coefficient
+        
+        return result if coefficient.value == 1 else Mul(coefficient, result)
 
     def __str__(self):
         return f"({self.left} * {self.right})"
@@ -645,4 +587,3 @@ print(f"(x^2)^3 = {test4.simplify()}")  # Should output: (x ^ 6)
 
 test5 = (x * x * y) / (x * y)
 print(f"(x*x*y)/(x*y) = {test5.simplify()}")  # Should output: x, 
-
