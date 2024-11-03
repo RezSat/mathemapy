@@ -61,29 +61,35 @@ class Add(Expression):
         # Combine like terms
         terms = defaultdict(lambda: Number(0))
         
-        def collect_terms(expr):
-            """Recursively collect terms from nested additions"""
+        def get_canonical_form(expr):
+            """Get a canonical string representation for comparison"""
+            if isinstance(expr, Mul):
+                factors = []
+                coefficient = Number(1)
+                
+                def collect_factors(e):
+                    nonlocal coefficient
+                    if isinstance(e, Number):
+                        coefficient = Number(coefficient.value * e.value)
+                    elif isinstance(e, Mul):
+                        collect_factors(e.left)
+                        collect_factors(e.right)
+                    else:
+                        factors.append(str(e))
+                
+                collect_factors(expr)
+                factors.sort()
+                return tuple(factors), coefficient
+            return (str(expr),), Number(1)
+        
+        def collect_terms(expr, coeff=Number(1)):
             if isinstance(expr, Add):
                 collect_terms(expr.left)
                 collect_terms(expr.right)
             else:
-                add_term(expr)
-        
-        def add_term(expr, coefficient=Number(1)):
-            if isinstance(expr, Number):
-                terms[Number(1)] = Number(terms[Number(1)].value + expr.value)
-            elif isinstance(expr, Symbol):
-                terms[expr] = Number(terms[expr].value + coefficient.value)
-            elif isinstance(expr, Mul):
-                # Handle cases like 2*x + 3*x
-                if isinstance(expr.left, Number) and isinstance(expr.right, Symbol):
-                    terms[expr.right] = Number(terms[expr.right].value + expr.left.value)
-                elif isinstance(expr.right, Number) and isinstance(expr.left, Symbol):
-                    terms[expr.left] = Number(terms[expr.left].value + expr.right.value)
-                else:
-                    terms[expr] = Number(terms[expr].value + coefficient.value)
-            else:
-                terms[expr] = Number(terms[expr].value + coefficient.value)
+                canonical_form, term_coeff = get_canonical_form(expr)
+                total_coeff = Number(coeff.value * term_coeff.value)
+                terms[canonical_form] = Number(terms[canonical_form].value + total_coeff.value)
         
         # Collect terms from both sides
         collect_terms(left_simple)
@@ -91,27 +97,66 @@ class Add(Expression):
         
         # Construct the simplified expression
         result = None
-        sorted_terms = sorted(terms.items(), key=lambda x: str(x[0]))  # Sort terms for consistent output
+        sorted_terms = sorted(terms.items())  # Sort terms for consistent output
         
-        for term, coeff in sorted_terms:
+        def reconstruct_term(canonical_form):
+            """Reconstruct term from canonical form"""
+            if len(canonical_form) == 1:
+                # Single term
+                if isinstance(left_simple, Symbol) and str(left_simple) == canonical_form[0]:
+                    return left_simple
+                if isinstance(right_simple, Symbol) and str(right_simple) == canonical_form[0]:
+                    return right_simple
+                # Search in multiplicative terms
+                if isinstance(left_simple, Mul) and str(left_simple) == canonical_form[0]:
+                    return left_simple
+                if isinstance(right_simple, Mul) and str(right_simple) == canonical_form[0]:
+                    return right_simple
+            else:
+                # Multiplicative term
+                term = None
+                for factor_str in canonical_form:
+                    factor = None
+                    # Try to find the original expression for this factor
+                    if isinstance(left_simple, Symbol) and str(left_simple) == factor_str:
+                        factor = left_simple
+                    elif isinstance(right_simple, Symbol) and str(right_simple) == factor_str:
+                        factor = right_simple
+                    
+                    if factor is None:
+                        # Search in multiplicative terms
+                        if isinstance(left_simple, Mul):
+                            if str(left_simple.left) == factor_str:
+                                factor = left_simple.left
+                            elif str(left_simple.right) == factor_str:
+                                factor = left_simple.right
+                        if isinstance(right_simple, Mul):
+                            if str(right_simple.left) == factor_str:
+                                factor = right_simple.left
+                            elif str(right_simple.right) == factor_str:
+                                factor = right_simple.right
+                    
+                    if factor is not None:
+                        term = factor if term is None else Mul(term, factor)
+                
+                return term
+        
+        for canonical_form, coeff in sorted_terms:
             if coeff.value == 0:
                 continue
             
-            term_expr = None
-            if term == Number(1):
-                term_expr = coeff
-            elif coeff.value == 1:
-                term_expr = term
-            else:
-                term_expr = Mul(coeff, term)
-            
-            if result is None:
-                result = term_expr
-            else:
-                result = Add(result, term_expr)
+            term = reconstruct_term(canonical_form)
+            if term is not None:
+                if coeff.value != 1:
+                    term = Mul(Number(coeff.value), term)
+                
+                if result is None:
+                    result = term
+                else:
+                    result = Add(result, term)
         
         return result if result is not None else Number(0)
-
+        
     def __str__(self):
         return f"({self.left} + {self.right})"
 
