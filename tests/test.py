@@ -54,7 +54,7 @@ y = Symbol('y')
 
 # These should simplify to the same expression:
 expr1 = x * y + y * x
-print(expr1.simplify())  # Should combine like terms, but result is : ((x * y) + (x * y))
+print(expr1.simplify())  # Should combine like terms, but result is : ((x * y) + (x * y)) # now its works nice by giving 2*(x*y)
 
 expr2 = Number(2) * x * y + y * x * Number(3)
 print(expr2.simplify())  # Should give (5 * x * y), but result is : (2 * (x * y)) + (3 * (x * y)))
