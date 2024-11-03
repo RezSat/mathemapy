@@ -14,6 +14,16 @@ class Expression(ABC):
     def simplify(self):
         pass
 
+    def __eq__(self, other: 'Expression') -> bool:
+        if not isinstance(other, Expression):
+            return False
+
+        # Compare simplified forms
+        return str(self.simplify()) == str(other.simplify())
+
+    def __hash__(self):
+        return hash(str(self.simplify()))
+
     @abstractmethod
     def __str__(self):
         pass

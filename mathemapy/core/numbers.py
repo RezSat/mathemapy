@@ -10,7 +10,7 @@ class Number(Expression):
         self.value = value
 
     def evaluate(self):
-        return self
+        return self.value
 
     def simplify(self):
         return self
@@ -34,6 +34,12 @@ class Number(Expression):
     def __pow__(self, other):
         from .pow import Pow
         return Pow(self, other)
+
+    def __eq__(self, other):
+        return isinstance(other, Number) and self.value == other.value
+        
+    def __hash__(self):
+        return hash(self.value)
 
     def __str__(self):
         return str(self.value)        

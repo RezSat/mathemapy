@@ -11,7 +11,7 @@ class Pow(Expression):
         eval_right = self.right.evaluate()
 
         if isinstance(self.left, Number) and isinstance(self.right, Number):
-            return Number(eval_left.value ** eval_right.value)
+            return Number(eval_left ** eval_right)
         else:
             return Add(self.left, self.right)
 
