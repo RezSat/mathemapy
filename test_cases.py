@@ -416,4 +416,4 @@ y = Symbol('y')
 expr2 = Number(2) * x * y + y * x * Number(3)
 expr3 = Number(2)*x + Number(3)*x
 print(expr3.simplify())
-print(expr2.simplify()) # Should give (5 * x * y), but result is : (2 * (x * y)) + (3 * (x * y)))
+print(expr2.simplify()) 
