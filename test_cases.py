@@ -60,103 +60,105 @@ class Add(Expression):
         
         # Combine like terms
         terms = defaultdict(lambda: Number(0))
+        numeric_sum = Number(0)
         
-        def get_canonical_form(expr):
-            """Get a canonical string representation for comparison"""
+        def get_term_key(expr):
+            """Get canonical form for term comparison"""
             if isinstance(expr, Mul):
+                # Sort factors for canonical form
                 factors = []
-                coefficient = Number(1)
-                
                 def collect_factors(e):
-                    nonlocal coefficient
-                    if isinstance(e, Number):
-                        coefficient = Number(coefficient.value * e.value)
-                    elif isinstance(e, Mul):
+                    if isinstance(e, Mul):
                         collect_factors(e.left)
                         collect_factors(e.right)
-                    else:
+                    elif not isinstance(e, Number):
                         factors.append(str(e))
-                
                 collect_factors(expr)
                 factors.sort()
-                return tuple(factors), coefficient
-            return (str(expr),), Number(1)
+                return tuple(factors)
+            elif isinstance(expr, Number):
+                return "number"
+            else:
+                return (str(expr),)
         
-        def collect_terms(expr, coeff=Number(1)):
+        def get_coefficient(expr):
+            """Extract coefficient from expression"""
+            if isinstance(expr, Number):
+                return expr.value
+            if isinstance(expr, Mul):
+                coeff = 1
+                def collect_coeff(e):
+                    nonlocal coeff
+                    if isinstance(e, Number):
+                        coeff *= e.value
+                    elif isinstance(e, Mul):
+                        collect_coeff(e.left)
+                        collect_coeff(e.right)
+                collect_coeff(expr)
+                return coeff
+            return 1
+        
+        def collect_terms(expr):
+            """Collect terms and coefficients"""
             if isinstance(expr, Add):
                 collect_terms(expr.left)
                 collect_terms(expr.right)
             else:
-                canonical_form, term_coeff = get_canonical_form(expr)
-                total_coeff = Number(coeff.value * term_coeff.value)
-                terms[canonical_form] = Number(terms[canonical_form].value + total_coeff.value)
+                nonlocal numeric_sum
+                coeff = get_coefficient(expr)
+                if isinstance(expr, Number):
+                    numeric_sum = Number(numeric_sum.value + coeff)
+                else:
+                    key = get_term_key(expr)
+                    if key == "number":
+                        numeric_sum = Number(numeric_sum.value + coeff)
+                    else:
+                        terms[key] = Number(terms[key].value + coeff)
         
         # Collect terms from both sides
         collect_terms(left_simple)
         collect_terms(right_simple)
         
-        # Construct the simplified expression
+        # Build result
         result = None
-        sorted_terms = sorted(terms.items())  # Sort terms for consistent output
         
-        def reconstruct_term(canonical_form):
-            """Reconstruct term from canonical form"""
-            if len(canonical_form) == 1:
-                # Single term
-                if isinstance(left_simple, Symbol) and str(left_simple) == canonical_form[0]:
-                    return left_simple
-                if isinstance(right_simple, Symbol) and str(right_simple) == canonical_form[0]:
-                    return right_simple
-                # Search in multiplicative terms
-                if isinstance(left_simple, Mul) and str(left_simple) == canonical_form[0]:
-                    return left_simple
-                if isinstance(right_simple, Mul) and str(right_simple) == canonical_form[0]:
-                    return right_simple
+        # Add symbolic terms
+        for key, coeff in sorted(terms.items()):
+            if coeff.value == 0:
+                continue
+                
+            if len(key) == 1:
+                # Single variable term
+                term = None
+                for expr in [left_simple, right_simple]:
+                    if isinstance(expr, Symbol) and str(expr) == key[0]:
+                        term = expr
+                        break
+                if term is None:
+                    continue
             else:
                 # Multiplicative term
                 term = None
-                for factor_str in canonical_form:
+                for factor_str in key:
                     factor = None
-                    # Try to find the original expression for this factor
-                    if isinstance(left_simple, Symbol) and str(left_simple) == factor_str:
-                        factor = left_simple
-                    elif isinstance(right_simple, Symbol) and str(right_simple) == factor_str:
-                        factor = right_simple
-                    
-                    if factor is None:
-                        # Search in multiplicative terms
-                        if isinstance(left_simple, Mul):
-                            if str(left_simple.left) == factor_str:
-                                factor = left_simple.left
-                            elif str(left_simple.right) == factor_str:
-                                factor = left_simple.right
-                        if isinstance(right_simple, Mul):
-                            if str(right_simple.left) == factor_str:
-                                factor = right_simple.left
-                            elif str(right_simple.right) == factor_str:
-                                factor = right_simple.right
-                    
+                    for expr in [left_simple, right_simple]:
+                        if str(expr) == factor_str:
+                            factor = expr
+                            break
                     if factor is not None:
                         term = factor if term is None else Mul(term, factor)
-                
-                return term
-        
-        for canonical_form, coeff in sorted_terms:
-            if coeff.value == 0:
-                continue
             
-            term = reconstruct_term(canonical_form)
             if term is not None:
                 if coeff.value != 1:
                     term = Mul(Number(coeff.value), term)
-                
-                if result is None:
-                    result = term
-                else:
-                    result = Add(result, term)
+                result = term if result is None else Add(result, term)
+        
+        # Add numeric term if present
+        if numeric_sum.value != 0:
+            result = numeric_sum if result is None else Add(result, numeric_sum)
         
         return result if result is not None else Number(0)
-        
+
     def __str__(self):
         return f"({self.left} + {self.right})"
 
