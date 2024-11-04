@@ -1,5 +1,6 @@
 from .expr import Expression
 from .numbers import Number
+from .ad import Add
 
 class Sub(Expression):
     def __init__(self, left: Expression, right: Expression):
@@ -7,16 +8,11 @@ class Sub(Expression):
         self.right = right
 
     def evaluate(self):
-        eval_left = self.left.evaluate()
-        eval_right = self.right.evaluate()
-
-        if isinstance(self.left, Number) and isinstance(self.right, Number):
-            return Number(eval_left - eval_right)
-        else:
-            return Add(self.left, self.right)
-
+        return Add(self.left, Mul(Number(-1), self.right)).evaluate()
+    
     def simplify(self):
-        pass # do something later
+        return Add(self.left, Mul(Number(-1), self.right)).simplify()
 
     def __str__(self):
-        return f'({self.left} - {self.right})'
+        return f"({self.left} - {self.right})"
+    
