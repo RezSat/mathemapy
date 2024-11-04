@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Expression(ABC):
-
     """
-    Expression class will be the parent for all other classes.
+    Expression class is the parent for all other classes
     """
-
     @abstractmethod
     def evaluate(self):
         pass
@@ -14,20 +12,33 @@ class Expression(ABC):
     def simplify(self):
         pass
 
-    def __eq__(self, other: 'Expression') -> bool:
-        if not isinstance(other, Expression):
-            return False
-
-        # Compare simplified forms
-        return str(self.simplify()) == str(other.simplify())
-
-    def __hash__(self):
-        return hash(str(self.simplify()))
-
     @abstractmethod
     def __str__(self):
         pass
 
     def __repr__(self):
         return self.__str__()
+    
+    def __add__(self, other):
+        return Add(self, other)
+    
+    def __sub__(self, other):
+        return Sub(self, other)
+    
+    def __mul__(self, other):
+        return Mul(self, other)
+    
+    def __truediv__(self, other):
+        return Div(self, other)
+    
+    def __pow__(self, other):
+        return Pow(self, other)
 
+    def __eq__(self, other: 'Expression') -> bool:
+        if not isinstance(other, Expression):
+            return False
+        # Compare simplified forms
+        return str(self.simplify()) == str(other.simplify())
+
+    def __hash__(self):
+        return hash(str(self.simplify()))
