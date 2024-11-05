@@ -1,5 +1,6 @@
 from .expr import Expression
 from .numbers import Number
+from .mul import Mul
 
 class Pow(Expression):
     def __init__(self, left: Expression, right: Expression):

@@ -1,6 +1,7 @@
 from .expr import Expression
 from .numbers import Number
 from .add import Add
+from .mul import Mul
 
 class Sub(Expression):
     def __init__(self, left: Expression, right: Expression):

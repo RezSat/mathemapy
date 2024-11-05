@@ -1,5 +1,8 @@
 from .expr import Expression
 from .numbers import Number
+from collections import  defaultdict
+from .mul import Mul
+from .pow import Pow
 
 class Div(Expression):
     def __init__(self, left: Expression, right: Expression):
