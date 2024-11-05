@@ -10,6 +10,8 @@ class Symbol(Expression):
     def simplify(self):
         return self
 
+    """
+
     def __add__(self, other):
         from .add import Add
         return Add(self, other)
@@ -29,6 +31,8 @@ class Symbol(Expression):
     def __pow__(self, other):
         from .pow import Pow
         return Pow(self, other)
+
+    """
 
     def __str__(self):
         return self.name
