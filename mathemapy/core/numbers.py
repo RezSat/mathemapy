@@ -15,6 +15,8 @@ class Number(Expression):
     def simplify(self):
         return self
 
+    """
+
     def __add__(self, other):
         from .add import Add
         return Add(self, other)
@@ -34,6 +36,8 @@ class Number(Expression):
     def __pow__(self, other):
         from .pow import Pow
         return Pow(self, other)
+
+    """
 
     def __eq__(self, other):
         return isinstance(other, Number) and self.value == other.value
