@@ -1,5 +1,6 @@
 from .expr import Expression
 from .numbers import Number
+from collections import defaultdict
 
 class Mul(Expression):
     def __init__(self, left: Expression, right: Expression):
@@ -16,6 +17,8 @@ class Mul(Expression):
         return self.simplify()
     
     def simplify(self):
+        from .pow import Pow
+        
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()
         
