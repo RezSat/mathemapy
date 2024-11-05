@@ -20,18 +20,23 @@ class Expression(ABC):
         return self.__str__()
     
     def __add__(self, other):
+        from .add import Add
         return Add(self, other)
     
     def __sub__(self, other):
+        from .sub import Sub
         return Sub(self, other)
     
     def __mul__(self, other):
+        from .mul import Mul
         return Mul(self, other)
     
     def __truediv__(self, other):
+        from .div import Div
         return Div(self, other)
     
     def __pow__(self, other):
+        from .pow import Pow
         return Pow(self, other)
 
     def __eq__(self, other: 'Expression') -> bool:
