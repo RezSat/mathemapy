@@ -16,3 +16,5 @@ print(expr3.simplify()) # 2*x
 expr4 = Number(2) * x * y + Number(3) * x * y
 print(expr4)
 print(expr4.simplify())
+
+#Todo: just simply create w unittest testings 
