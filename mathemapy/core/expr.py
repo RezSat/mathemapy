@@ -13,6 +13,10 @@ class Expression(ABC):
         pass
 
     @abstractmethod
+    def alternative(self):
+        pass
+
+    @abstractmethod
     def __str__(self):
         pass
 

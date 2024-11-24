@@ -1,0 +1,10 @@
+# we need to proper way to handle implicit multiplication and implicit division,for this look  into the source code of 
+Math.js Parser, it has some understandable code of doing that.
+
+# implement "alternative" method so that alternative simplified versions of the same expression can be output
+
+# Implement the "Integer" and "Float" classes and also methods to use our classes with python's builttins ex:
+ Number(5) + 5
+
+ # it's time to to create methods or  whatever functionality that is necessary to output intermediate steps and explanations
+ 
