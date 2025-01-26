@@ -10,6 +10,9 @@ class Symbol(Expression):
     def simplify(self):
         return self
 
+    def alternative(self):
+        return self
+    
     """
 
     def __add__(self, other):

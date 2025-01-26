@@ -14,6 +14,9 @@ class Number(Expression):
 
     def simplify(self):
         return self
+    
+    def alternative(self):
+        return self
 
     def __eq__(self, other):
         return isinstance(other, Number) and self.value == other.value

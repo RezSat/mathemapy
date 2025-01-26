@@ -15,7 +15,10 @@ class Pow(Expression):
             return Number(eval_left ** eval_right)
 
         return self.simplify()
-    
+
+    def alternative(self):
+        return self
+
     def simplify(self):
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()

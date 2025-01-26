@@ -16,6 +16,9 @@ class Mul(Expression):
 
         return self.simplify()
     
+    def alternative(self):
+        return self
+    
     def simplify(self):
         from .pow import Pow
         

@@ -1,4 +1,5 @@
 from core import *
+import math
 
 x = Symbol('x')
 y =  Symbol('y')
@@ -16,3 +17,15 @@ print(expr3.simplify()) # 2*x
 expr4 = Number(2) * x * y + Number(3) * x * y
 print(expr4)
 print(expr4.simplify())
+
+sin = Function('sin', [Symbol('x')], math.sin)
+
+expr1 = sin(x)
+print(expr1)
+
+pi = Number(math.pi)
+expr2 = sin(pi / Number(2))
+print(expr2.simplify())
+
+expr3 = sin(x + y)
+print(expr3)

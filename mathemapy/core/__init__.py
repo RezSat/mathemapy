@@ -6,6 +6,7 @@ from .sub import Sub
 from .mul import Mul
 from .div import Div
 from .pow import Pow
+from .func import Function
 
 
 __all__ = [
@@ -19,5 +20,7 @@ __all__ = [
     'Mul',
     'Div',
     'Pow',
+
+    'Function',
 
 ]

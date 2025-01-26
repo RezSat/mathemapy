@@ -57,6 +57,9 @@ class Add(Expression):
                 result = Add(result, term_expr)
 
         return result if result is not None else Number(0)
+    
+    def alternative(self):
+        return self
 
     def collect_terms(self,expr):
         """
