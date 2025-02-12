@@ -20,6 +20,9 @@ class Div(Expression):
 
         return self.simplify()
     
+    def alternative(self):
+        return self
+
     def simplify(self):
         left_simple = self.left.simplify()
         right_simple = self.right.simplify()
@@ -88,6 +91,7 @@ class Div(Expression):
                     del num_factors[factor]
                 if den_factors[factor].value == 0:
                     del den_factors[factor]
+        
         
         # Reconstruct the result
         def build_expression(coeff, factors):

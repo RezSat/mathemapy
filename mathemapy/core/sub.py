@@ -10,7 +10,10 @@ class Sub(Expression):
 
     def evaluate(self):
         return Add(self.left, Mul(Number(-1), self.right)).evaluate()
-    
+
+    def alternative(self):
+        return self
+
     def simplify(self):
         return Add(self.left, Mul(Number(-1), self.right)).simplify()
 
